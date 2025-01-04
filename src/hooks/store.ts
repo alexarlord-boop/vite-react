@@ -44,9 +44,6 @@ const useStore = create<AppState>()(
                     return get().type;
                 },
 
-                setNodes: (nodes) => {
-                    set({nodes});
-                },
 
                 onNodesChange: (changes) => {
                     set({
@@ -71,13 +68,13 @@ const useStore = create<AppState>()(
                 },
 
                 onDragStart: (event, nodeType) => {
-                    console.log('onDragStart', nodeType);
+                    // console.log('onDragStart', nodeType);
                     event.dataTransfer.effectAllowed = 'move';
                     if (nodeType != null) { set({type: nodeType}); }
                 },
 
                 onNodeClick: (event, node) => {
-                    console.log('onNodeClick', event);
+                    // console.log('onNodeClick', event);
                     set({clickedNode: node});
                 },
 
@@ -86,7 +83,7 @@ const useStore = create<AppState>()(
                 onDragOver: (event) => {
                     event.preventDefault();
                     event.dataTransfer.dropEffect = 'move';
-                    console.log('onDragOver', event);
+                    // console.log('onDragOver', event);
                 },
 
                 onDrop: (event, position) => {
@@ -100,7 +97,7 @@ const useStore = create<AppState>()(
                         data: { label: `${type} node` },
                     };
                     set({ nodes: [...get().nodes, newNode] });
-                    console.log('onDrop', newNode);
+                    // console.log('onDrop', newNode);
                 }
             }
         ),

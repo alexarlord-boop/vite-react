@@ -166,45 +166,6 @@ const DnDFlow = () => {
         onDrop(event, position);
     };
 
-    // const onDrop = useCallback(
-    //     (event) => {
-    //         event.preventDefault();
-    //
-    //         console.log('onDrop', event);
-    //         const type = getType();
-    //         console.log('type', type);
-    //         // check if the dropped element is valid
-    //         if (!type) {
-    //             return;
-    //         }
-    //
-    //         // project was renamed to screenToFlowPosition
-    //         // and you don't need to subtract the reactFlowBounds.left/top anymore
-    //         // details: https://reactflow.dev/whats-new/2023-11-10
-    //         const position = screenToFlowPosition({
-    //             x: event.clientX,
-    //             y: event.clientY,
-    //         });
-    //
-    //         const newNode = {
-    //             id: getId(),
-    //             type,
-    //             position,
-    //             data: {label: `${type}`},
-    //         };
-    //
-    //     //    add node to nodes
-    //         nodes.push(newNode);
-    //         console.log('nodes', nodes);
-    //         setNodes(nodes);
-    //
-    //
-    //
-    //     },
-    //     [screenToFlowPosition],
-    // );
-
-
     return (
         <div className="dndflow">
             <div style={{height: '100vh', width: '100vw'}} className="" ref={reactFlowWrapper}>
@@ -343,7 +304,6 @@ export default () => (
     </ReactFlowProvider>
 );
 
-// TODO:- make diagram saveable and reproducable (zustand state)
 // TODO:- make nodes with editable props -- more props
 // TODO:- make sample artifacts generation (preview)
 // TODO:- clear the code
