@@ -1,5 +1,7 @@
 import {create} from 'zustand';
-import {addEdge, applyNodeChanges, applyEdgeChanges} from '@xyflow/react';
+import { persist } from 'zustand/middleware';
+
+import {addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow} from '@xyflow/react';
 import {
     type Edge,
     type Node,
@@ -24,88 +26,87 @@ import {type AppState} from './types';
 import {useCallback} from "react";
 
 // this is our useStore hook that we can use in our components to get parts of the store and call actions
-const useStore = create<AppState>((set, get) => ({
-    nodes: [],
-    edges: [],
-    id: 0,
+const useStore = create<AppState>()(
+    persist(
+        (set, get) => (
+            {
+                nodes: [],
+                edges: [],
+                id: 0,
+                type: null,
+
+                getId: () => {
+                    set({id:  get().id + 1});
+                    return `dndnode_` + get().id;
+                },
+
+                getType: () => {
+                    return get().type;
+                },
+
+                setNodes: (nodes) => {
+                    set({nodes});
+                },
+
+                onNodesChange: (changes) => {
+                    set({
+                        nodes: applyNodeChanges(changes, get().nodes),
+                    });
+                },
+                onEdgesChange: (changes) => {
+                    set({
+                        edges: applyEdgeChanges(changes, get().edges),
+                    });
+                },
+                onConnect: (connection) => {
+                    set({
+                        edges: addEdge(connection, get().edges),
+                    });
+                },
+                setNodes: (nodes) => {
+                    set({nodes});
+                },
+                setEdges: (edges) => {
+                    set({edges});
+                },
+
+                onDragStart: (event, nodeType) => {
+                    console.log('onDragStart', nodeType);
+                    event.dataTransfer.effectAllowed = 'move';
+                    if (nodeType != null) { set({type: nodeType}); }
+                },
+
+                onNodeClick: (event, node) => {
+                    console.log('onNodeClick', event);
+                    set({clickedNode: node});
+                },
 
 
-    onNodesChange: (changes) => {
-        set({
-            nodes: applyNodeChanges(changes, get().nodes),
-        });
-    },
-    onEdgesChange: (changes) => {
-        set({
-            edges: applyEdgeChanges(changes, get().edges),
-        });
-    },
-    onConnect: (connection) => {
-        set({
-            edges: addEdge(connection, get().edges),
-        });
-    },
-    setNodes: (nodes) => {
-        set({nodes});
-    },
-    setEdges: (edges) => {
-        set({edges});
-    },
 
-    onDrop: (event) => {
-        event.preventDefault();
-        // const position = screenToFlowPosition({
-        //     x: event.clientX,
-        //     y: event.clientY,
-        // });
-        // console.log('onDrop', event);
+                onDragOver: (event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    console.log('onDragOver', event);
+                },
 
-        function getId() {
-            return `dndnode_${id++}`;
+                onDrop: (event, position) => {
+                    event.preventDefault();
+                    const type = get().type;
+                    const id = get().getId();
+                    const newNode: AppNode = {
+                        id,
+                        type,
+                        position,
+                        data: { label: `${type} node` },
+                    };
+                    set({ nodes: [...get().nodes, newNode] });
+                    console.log('onDrop', newNode);
+                }
+            }
+        ),
+        {
+            name: 'dnd-app',
         }
-
-        const newNode = {
-                            id: getId(),
-                            type,
-                            position,
-                            data: {label: `${type}`},
-                        };
-
-    },
-
-    onDragOver: (event) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-        console.log('onDragOver', event);
-    }
-
-    // const onDrop = useCallback(
-    //     (event) => {
-    //         event.preventDefault();
-    //
-    //         // check if the dropped element is valid
-    //         if (!type) {
-    //             return;
-    //         }
-    //
-    //         // project was renamed to screenToFlowPosition
-    //         // and you don't need to subtract the reactFlowBounds.left/top anymore
-    //         // details: https://reactflow.dev/whats-new/2023-11-10
-    //         const position = screenToFlowPosition({
-    //             x: event.clientX,
-    //             y: event.clientY,
-    //         });
-    //         const newNode = {
-    //             id: getId(),
-    //             type,
-    //             position,
-    //             data: {label: `${type}`},
-    //         };
-    //
-    //         setNodes((nds) => nds.concat(newNode));
-    //     },
-    //     [screenToFlowPosition, type],
-    // );
-}));
-
+    )
+)
 export default useStore;

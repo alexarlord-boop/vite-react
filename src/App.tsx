@@ -23,18 +23,35 @@ import {Button} from "@/components/ui/button.tsx";
 import {SaveIcon, TargetIcon} from "lucide-react";
 
 import useStore from './hooks/store.ts';
+import {useShallow} from "zustand/react/shallow";
 
 
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+
+const selector = (state) => ({
+    getId: state.getId,
+    getType: state.getType,
+    nodes: state.nodes,
+    setNodes: state.setNodes,
+    edges: state.edges,
+    onNodesChange: state.onNodesChange,
+    onEdgesChange: state.onEdgesChange,
+    onConnect: state.onConnect,
+    onNodeClick: state.onNodeClick,
+    onDrop: state.onDrop,
+    onDragStart: state.onDragStart,
+    onDragOver: state.onDragOver,
+});
 
 
 const DnDFlow = () => {
     const reactFlowWrapper = useRef(null);
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    // const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const {screenToFlowPosition} = useReactFlow();
-    const [type, setType] = useDnD();
+
+    const { getId,getType, nodes, setNodes, edges, onNodesChange, onEdgesChange, onConnect, onNodeClick, onDragStart, onDragOver, onDrop } = useStore(
+        useShallow(selector),
+    );
 
 
     // updating node props
@@ -42,27 +59,22 @@ const DnDFlow = () => {
 
     const [selectedNode, setSelectedNode] = useState(null);
 
-    const onNodeClick = (event: any, node: any) => {
-        setNodeName('');
-        ;
-        setSelectedNode(node);
-        setNodes((nds) =>
-            nds.map((n) => ({
-                ...n,
-                data: {
-                    ...n.data,
-                    selected: n.id === node.id,
-                },
-            }))
-        );
-    }
+    // const onNodeClick = (event: any, node: any) => {
+    //     setNodeName('');
+    //     setSelectedNode(node);
+    //     setNodes((nds) =>
+    //         nds.map((n) => ({
+    //             ...n,
+    //             data: {
+    //                 ...n.data,
+    //                 selected: n.id === node.id,
+    //             },
+    //         }))
+    //     );
+    // }
 
 
-    // const nodeTypes = [
-    //     {type: 'frontend', label: 'Frontend', color: '#FFD700'},
-    //     {type: 'backend', label: 'Backend', color: '#FF4500'},
-    //     {type: 'DB', label: 'Database', color: '#4169E1'},
-    // ];
+
 
     const nodeTypes = {
         frontend: FrontendNode,
@@ -76,97 +88,61 @@ const DnDFlow = () => {
     }
 
 
-    const onConnect = useCallback(
-        (params) => setEdges((eds) => addEdge(params, eds)),
-        [],
-    );
+    // const onDragOver = useCallback((event) => {
+    //     event.preventDefault();
+    //     event.dataTransfer.dropEffect = 'move';
+    // }, []);
 
-    const onDragStart = (event, nodeType) => {
-        setType(nodeType);
-        event.dataTransfer.effectAllowed = 'move';
-    };
 
-    const onDragOver = useCallback((event) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-    }, []);
-
-    const onDrop = useCallback(
-        (event) => {
-            event.preventDefault();
-
-            // check if the dropped element is valid
-            if (!type) {
-                return;
-            }
-
-            // project was renamed to screenToFlowPosition
-            // and you don't need to subtract the reactFlowBounds.left/top anymore
-            // details: https://reactflow.dev/whats-new/2023-11-10
-            const position = screenToFlowPosition({
-                x: event.clientX,
-                y: event.clientY,
-            });
-            const newNode = {
-                id: getId(),
-                type,
-                position,
-                data: {label: `${type}`},
-            };
-
-            setNodes((nds) => nds.concat(newNode));
-        },
-        [screenToFlowPosition, type],
-    );
 
 
     // updating nodes effect
-    useEffect(() => {
-        // @ts-ignore
-        setNodes((nds) =>
-            nds.map((node) => {
-                // @ts-ignore
-                if (selectedNode) {
-
-                    if (node.id === selectedNode.id) {
-                        // it's important that you create a new node object
-                        // in order to notify react flow about the change
-                        // @ts-ignore
-                        return {
-                            ...node,
-                            data: {
-                                ...node.data,
-                                label: nodeName || node.data.label,
-                            },
-                            style: {border: '1px  dashed black'}, // Highlight the selected node
-
-                        };
-                    }
-                }
-                return {
-                    ...node,
-                    style: {border: 'none'}, // Remove highlight from other nodes
-                };
-            }),
-        );
-
-        // @ts-ignore
-        setEdges((eds) =>
-            eds.map((edge) => {
-                if (edge.source === selectedNode?.id || edge.target === selectedNode?.id) {
-                    return {
-                        ...edge,
-                        style: {stroke: 'blue', strokeWidth: 1, strokeDasharray: '5,5'}, // Highlight the related edges
-                    };
-                }
-                return {
-                    ...edge,
-                    style: {stroke: 'black', strokeWidth: 1}, // Default style for other edges
-                };
-            })
-        );
-
-    }, [nodeName, selectedNode, setNodes]);
+    // useEffect(() => {
+    //     // @ts-ignore
+    //     setNodes((nds) =>
+    //         nds.map((node) => {
+    //             // @ts-ignore
+    //             if (selectedNode) {
+    //
+    //                 if (node.id === selectedNode.id) {
+    //                     // it's important that you create a new node object
+    //                     // in order to notify react flow about the change
+    //                     // @ts-ignore
+    //                     return {
+    //                         ...node,
+    //                         data: {
+    //                             ...node.data,
+    //                             label: nodeName || node.data.label,
+    //                         },
+    //                         style: {border: '1px  dashed black'}, // Highlight the selected node
+    //
+    //                     };
+    //                 }
+    //             }
+    //             return {
+    //                 ...node,
+    //                 style: {border: 'none'}, // Remove highlight from other nodes
+    //             };
+    //         }),
+    //     );
+    //
+    //     // @ts-ignore
+    //     setEdges((eds) =>
+    //         eds.map((edge) => {
+    //             if (edge.source === selectedNode?.id || edge.target === selectedNode?.id) {
+    //                 return {
+    //                     ...edge,
+    //                     style: {stroke: 'blue', strokeWidth: 1, strokeDasharray: '5,5'}, // Highlight the related edges
+    //                 };
+    //             }
+    //             return {
+    //                 ...edge,
+    //                 style: {stroke: 'black', strokeWidth: 1}, // Default style for other edges
+    //             };
+    //         })
+    //     );
+    //
+    // }, [nodeName, selectedNode]);
 
     const updateNode = (key: string, value: string) => {
         console.log(key, value);
@@ -179,6 +155,55 @@ const DnDFlow = () => {
         setSelectedNode(null);
     }
 
+    const handleDrop = (event) => {
+        event.preventDefault();
+
+        const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+        const position = screenToFlowPosition({
+            x: event.clientX - reactFlowBounds.left,
+            y: event.clientY - reactFlowBounds.top,
+        });
+        onDrop(event, position);
+    };
+
+    // const onDrop = useCallback(
+    //     (event) => {
+    //         event.preventDefault();
+    //
+    //         console.log('onDrop', event);
+    //         const type = getType();
+    //         console.log('type', type);
+    //         // check if the dropped element is valid
+    //         if (!type) {
+    //             return;
+    //         }
+    //
+    //         // project was renamed to screenToFlowPosition
+    //         // and you don't need to subtract the reactFlowBounds.left/top anymore
+    //         // details: https://reactflow.dev/whats-new/2023-11-10
+    //         const position = screenToFlowPosition({
+    //             x: event.clientX,
+    //             y: event.clientY,
+    //         });
+    //
+    //         const newNode = {
+    //             id: getId(),
+    //             type,
+    //             position,
+    //             data: {label: `${type}`},
+    //         };
+    //
+    //     //    add node to nodes
+    //         nodes.push(newNode);
+    //         console.log('nodes', nodes);
+    //         setNodes(nodes);
+    //
+    //
+    //
+    //     },
+    //     [screenToFlowPosition],
+    // );
+
 
     return (
         <div className="dndflow">
@@ -189,10 +214,11 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onDrop={onDrop}
+                    onDrop={handleDrop}
+                    onDragStart={onDragStart}
                     onDragOver={onDragOver}
-                    onNodeClick={onNodeClick}
-                    onNodesDelete={onNodesDelete}
+                    // onNodeClick={onNodeClick}
+                    // onNodesDelete={onNodesDelete}
                     fitView
                     style={{backgroundColor: "#F7F9FB"}}
                     nodeTypes={nodeTypes}
