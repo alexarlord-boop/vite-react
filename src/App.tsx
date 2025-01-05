@@ -13,6 +13,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import {ScrollArea} from "@/components/ui/scroll-area"
 // @ts-ignore
+import NodeComponent from "@/components/NodeComponent.jsx";
 import FrontendNode from "@/components/FrontendNode.jsx";
 import BackendNode from "@/components/BackendNode.jsx";
 import DatabaseNode from "@/components/DatabaseNode.jsx";
@@ -62,10 +63,10 @@ const DnDFlow = () => {
     );
 
     const nodeTypes = {
-        frontend: FrontendNode,
-        backend: BackendNode,
-        db: DatabaseNode,
-        ms: MicroserviceNode,
+        frontend: NodeComponent,
+        backend: NodeComponent,
+        db: NodeComponent,
+        ms: NodeComponent,
     };
 
     const updateNode = (key: string, value: string) => {
@@ -212,7 +213,6 @@ export default () => (
     </ReactFlowProvider>
 );
 
-// TODO:- make nodes with editable props -- more props
 // TODO:- make sample artifacts generation (preview)
 // TODO:- clear the code
 // TODO:- add templates

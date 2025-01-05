@@ -25,6 +25,30 @@ export type AppState = {
 import {type AppState} from './types';
 import {useCallback} from "react";
 
+
+const defaultFrontend = {
+    port: '3000',
+    framework: 'React',
+    buildCommand: 'npm run build',
+};
+
+const defaultBackend = {
+    language: 'Python',
+    port: '5000',
+    env_var: ['PORT=5000'],
+    replicas: 1,
+    endpoints: [],
+}
+
+const defaultDb = {
+    db_type: 'PostgreSQL v14',
+    port: '5432',
+    host: 'localhost',
+    env_var: ['POSTGRES_USER=postgres', 'POSTGRES_PASSWORD=postgres', 'POSTGRES_DB=postgres'],
+    storage_volume: '/var/lib/postgresql/data'
+}
+
+
 // this is our useStore hook that we can use in our components to get parts of the store and call actions
 const useStore = create<AppState>()(
     persist(
@@ -82,7 +106,13 @@ const useStore = create<AppState>()(
                     set({
                         nodes: get().nodes.map((n) => {
                             if (n.id === node.id) {
-                                return {...n, style: {border: '1px dashed black',  padding: '1px'}};
+                                return {
+                                    ...n, style: {
+                                        outline: '2px dashed black',
+                                        borderRadius: '5px',
+
+                                    }
+                                };
                             } else {
                                 return {...n, style: {}};
                             }
@@ -105,11 +135,33 @@ const useStore = create<AppState>()(
                     event.preventDefault();
                     const type = get().type;
                     const id = get().getId();
+                    let defaults = null
+
+                    switch (type) {
+                        case 'frontend':
+                            defaults = defaultFrontend;
+                            break;
+                        case 'backend':
+                            defaults = defaultBackend;
+                            break;
+                        case 'db':
+                            defaults = defaultDb;
+                            break;
+                        // case 'ms':
+                        //     defaults = defaultMs;
+                        //     break;
+                    }
+
+
                     const newNode: AppNode = {
                         id,
                         type,
                         position,
-                        data: {label: `${type[0].toUpperCase()}`},
+                        data: {
+                            type: type,
+                            label: `${type[0].toUpperCase()}`,
+                            ...defaults,
+                        },
                     };
                     set({nodes: [...get().nodes, newNode]});
                 }
