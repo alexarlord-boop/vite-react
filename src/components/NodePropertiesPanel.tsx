@@ -2,13 +2,6 @@ import React, {useEffect, useRef} from 'react';
 
 const PropertiesPanel: React.FC<any> = ({ selectedNode, onUpdate }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-
-    // useEffect(() => {
-    //     if (inputRef.current) {
-    //         inputRef.current.focus();
-    //     }
-    // }, [selectedNode]);
-
     if (!selectedNode) {
         return <div>Select a node to edit properties</div>;
     }

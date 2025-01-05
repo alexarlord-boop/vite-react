@@ -1,5 +1,5 @@
 import {create} from 'zustand';
-import { persist } from 'zustand/middleware';
+import {persist} from 'zustand/middleware';
 
 import {addEdge, applyNodeChanges, applyEdgeChanges, useReactFlow} from '@xyflow/react';
 import {
@@ -34,9 +34,10 @@ const useStore = create<AppState>()(
                 edges: [],
                 id: 0,
                 type: null,
+                selectedNode: null,
 
                 getId: () => {
-                    set({id:  get().id + 1});
+                    set({id: get().id + 1});
                     return `dndnode_` + get().id;
                 },
 
@@ -70,20 +71,34 @@ const useStore = create<AppState>()(
                 onDragStart: (event, nodeType) => {
                     // console.log('onDragStart', nodeType);
                     event.dataTransfer.effectAllowed = 'move';
-                    if (nodeType != null) { set({type: nodeType}); }
+                    if (nodeType != null) {
+                        set({type: nodeType});
+                    }
                 },
 
                 onNodeClick: (event, node) => {
-                    // console.log('onNodeClick', event);
-                    set({clickedNode: node});
+                    console.log('onNodeClick', node);
+                    set({selectedNode: node});
+                    set({
+                        nodes: get().nodes.map((n) => {
+                            if (n.id === node.id) {
+                                return {...n, style: {border: '1px dashed black',  padding: '1px'}};
+                            } else {
+                                return {...n, style: {}};
+                            }
+                        }),
+
+                    })
                 },
 
+                onNodesDelete: (event, nodes) => {
+                    set({selectedNode: null});
+                },
 
 
                 onDragOver: (event) => {
                     event.preventDefault();
                     event.dataTransfer.dropEffect = 'move';
-                    // console.log('onDragOver', event);
                 },
 
                 onDrop: (event, position) => {
@@ -94,10 +109,9 @@ const useStore = create<AppState>()(
                         id,
                         type,
                         position,
-                        data: { label: `${type} node` },
+                        data: {label: `${type[0].toUpperCase()}`},
                     };
-                    set({ nodes: [...get().nodes, newNode] });
-                    // console.log('onDrop', newNode);
+                    set({nodes: [...get().nodes, newNode]});
                 }
             }
         ),
