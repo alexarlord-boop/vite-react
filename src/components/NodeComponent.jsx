@@ -3,7 +3,7 @@ import {Handle, Position, useStore} from '@xyflow/react';
 import {CogIcon, Database, DatabaseIcon, PhoneIcon, ServerIcon, SmartphoneIcon} from "lucide-react";
 
 // Define node types and their metadata
-const NODE_TYPES = {
+export const NODE_TYPES = {
     frontend: {
         label: "Frontend",
         color: "bg-red-100",
@@ -87,7 +87,7 @@ const NodeComponent = memo(({id, data}) => {
             } ${nodeStyle.shadowColor || 'shadow-gray-500'}`}
         >
             {icon(type)}
-            <strong>{label || nodeStyle.label || 'Node'}</strong>
+            <strong>{label }</strong>
             {/* Additional data */}
             {rest.description && <p className="text-sm text-gray-700">{rest.description}</p>}
             {handles(type)}

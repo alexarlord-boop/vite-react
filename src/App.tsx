@@ -21,14 +21,28 @@ import MicroserviceNode from "@/components/MicroserviceNode.jsx";
 import {DnDProvider, useDnD} from './DnDContext.jsx';
 import NodePropertiesPanel from "@/components/NodePropertiesPanel.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {SaveIcon, TargetIcon} from "lucide-react";
+import {
+    BedDoubleIcon,
+    BedSingleIcon, CircleDotIcon,
+    CogIcon,
+    DatabaseIcon, EllipsisIcon,
+    FileIcon, GripIcon,
+    PencilIcon,
+    SaveIcon, ServerCogIcon,
+    ServerIcon,
+    SmartphoneIcon,
+    TargetIcon
+} from "lucide-react";
 
 import useStore from './hooks/store.ts';
 import {useShallow} from "zustand/react/shallow";
-
+import SideMenuWithPanels from "@/components/SideMenu.tsx";
+import {NODE_TYPES} from "@/components/NodeComponent.jsx";
+import NodeArtifactsPanel from "@/components/NodeArtifactsPanel.tsx";
 
 const selector = (state) => ({
     selectedNode: state.selectedNode,
+    setType: state.setType,
     nodes: state.nodes,
     edges: state.edges,
     onNodesChange: state.onNodesChange,
@@ -39,6 +53,7 @@ const selector = (state) => ({
     onDragStart: state.onDragStart,
     onDragOver: state.onDragOver,
     onNodesDelete: state.onNodesDelete,
+    generateArtifacts: state.generateArtifacts,
 });
 
 
@@ -46,8 +61,11 @@ const DnDFlow = () => {
     const reactFlowWrapper = useRef(null);
     const {screenToFlowPosition} = useReactFlow();
 
+    const [getArtifactsIsClicked, setGetArtifactsIsClicked] = useState(false);
+
     const {
         selectedNode,
+        setType,
         nodes,
         edges,
         onNodesChange,
@@ -57,7 +75,8 @@ const DnDFlow = () => {
         onDragStart,
         onDragOver,
         onDrop,
-        onNodesDelete
+        onNodesDelete,
+        generateArtifacts,
     } = useStore(
         useShallow(selector),
     );
@@ -106,103 +125,156 @@ const DnDFlow = () => {
                 >
                     <Controls/>
                     <Background/>
-                    <Panel
-                        position="bottom-right">Nodes: {nodes.length} Edges: {edges.length} Selected: {selectedNode?.data.label}</Panel>
+                    <Panel position="bottom-right">Nodes: {nodes.length} Edges: {edges.length} Selected: {selectedNode?.data.label}</Panel>
                     <Panel position="top-left">
-                        <ScrollArea className="w-[160px] rounded-md border p-4 bg-white">
-                            <h4 className="sticky top-0 py-1 mb-4 text-sm font-medium bg-white">Nodes</h4>
-                            <Button
-                                key="frontend"
-                                onDragStart={(event) => onDragStart(event, "frontend")}
-                                draggable
-                                className="cursor-pointer p-2 mb-2 w-full"
-                            >
-                                Frontend
-                            </Button>
+                       <div className="">
+                           {/*BASIC NODES*/}
+                           <ScrollArea className="rounded-md border p-4 bg-white max-w-[100px]">
+                               <h4 className="sticky top-0 py-1 mb-4 text-sm font-medium bg-white">Nodes</h4>
+                               <Button
+                                   aria-label="Frontend"
+                                   key="frontend"
+                                   onDragStart={(event) => onDragStart(event, "frontend")}
+                                   draggable
+                                   className="cursor-pointer p-2 mb-2 w-full"
+                               >
+                                   <SmartphoneIcon/>
+                               </Button>
 
-                            <Button className="cursor-pointer p-2 mb-2 w-full"
-                                    onDragStart={(event) => onDragStart(event, 'backend')} draggable>
-                                Backend
-                            </Button>
+                               <Button className="cursor-pointer p-2 mb-2 w-full"
+                                       onDragStart={(event) => onDragStart(event, 'backend')} draggable>
+                                   <CogIcon/>
+                               </Button>
 
-                            <Button className="cursor-pointer p-2 mb-2 w-full"
-                                    onDragStart={(event) => onDragStart(event, 'db')} draggable>
-                                Database
-                            </Button>
+                               <Button className="cursor-pointer p-2 mb-2 w-full"
+                                       onDragStart={(event) => onDragStart(event, 'db')} draggable>
+                                   <DatabaseIcon/>
+                               </Button>
 
-                            <Button className="cursor-pointer p-2 mb-2 w-full"
-                                    onDragStart={(event) => onDragStart(event, 'ms')} draggable>
-                                Microservice
-                            </Button>
-
-
-                        </ScrollArea>
-
-                        <ScrollArea className="w-[160px] rounded-md border p-4 bg-white">
-                            <h4 className="sticky top-0 py-1 mb-4 text-sm font-medium bg-white">Templates</h4>
-                            <Button
-                                key="frontend"
-                                // onDragStart={(event) => onDragStart(event, "monolith")}
-                                draggable
-                                className="cursor-pointer p-2 mb-2 w-full"
-                            >
-                                Monolith
-                            </Button>
-
-                            <Button
-                                className="cursor-pointer p-2 mb-2 w-full"
-                                // onDragStart={(event) => onDragStart(event, '3-tier')}
-                                draggable>
-
-                                3-Tier
-                            </Button>
-
-                            <Button
-                                className="cursor-pointer p-2 mb-2 w-full"
-
-                                onDragStart={(event) => onDragStart(event, 'microservices')}
-                                draggable
-                            >
-                                Microservices
-                            </Button>
-
-                            <Button
-                                className="cursor-pointer p-2 mb-2 w-full"
-                                onDragStart={(event) => onDragStart(event, 'ms')}
-                                draggable
-                            >
-                                Serverless
-                            </Button>
+                               <Button className="cursor-pointer p-2 mb-2 w-full"
+                                       onDragStart={(event) => onDragStart(event, 'ms')} draggable>
+                                   <ServerIcon/>
+                               </Button>
 
 
-                        </ScrollArea>
+                           </ScrollArea>
+
+                           {/*TEMPLATES*/}
+                           <ScrollArea className=" rounded-md border p-4 bg-white max-w-[100px]">
+                               <h4 className="sticky top-0 py-1 mb-4 text-sm font-medium bg-white">Models</h4>
+                               <Button
+                                   key="frontend"
+                                   // onDragStart={(event) => onDragStart(event, "monolith")}
+                                   draggable
+                                   className="cursor-pointer p-2 mb-2 w-full"
+                               >
+                                   <CircleDotIcon/>
+                               </Button>
+
+                               <Button
+                                   className="cursor-pointer p-2 mb-2 w-full"
+                                   // onDragStart={(event) => onDragStart(event, '3-tier')}
+                                   draggable>
+
+                                   <EllipsisIcon/>
+                               </Button>
+
+                               <Button
+                                   className="cursor-pointer p-2 mb-2 w-full"
+
+                                   onDragStart={(event) => onDragStart(event, 'microservices')}
+                                   draggable
+                               >
+                                   <GripIcon/>
+                               </Button>
+
+                               <Button
+                                   className="cursor-pointer p-2 mb-2 w-full"
+                                   onDragStart={(event) => onDragStart(event, 'ms')}
+                                   draggable
+                               >
+                                   ƛ
+                               </Button>
+
+
+
+                           </ScrollArea>
+                       </div>
+
+                        {/*KUBERNETES*/}
+                        {/*<ScrollArea className="rounded-md border p-4 bg-white max-w-[200px]">*/}
+                        {/*    <h4 className="sticky top-0 py-1 mb-4 text-sm font-medium bg-white">Kubernetes (K8s)</h4>*/}
+                        {/*    <Button*/}
+                        {/*        key="frontend"*/}
+                        {/*        // onDragStart={(event) => onDragStart(event, "monolith")}*/}
+                        {/*        draggable*/}
+                        {/*        className="cursor-pointer p-2 mb-2 w-full"*/}
+                        {/*    >*/}
+                        {/*        Ingress*/}
+                        {/*    </Button>*/}
+
+                        {/*    <Button*/}
+                        {/*        className="cursor-pointer p-2 mb-2 w-full"*/}
+                        {/*        // onDragStart={(event) => onDragStart(event, '3-tier')}*/}
+                        {/*        draggable>*/}
+
+                        {/*        Persistent Storage*/}
+                        {/*    </Button>*/}
+
+                        {/*    <Button*/}
+                        {/*        className="cursor-pointer p-2 mb-2 w-full"*/}
+
+                        {/*        onDragStart={(event) => onDragStart(event, 'microservices')}*/}
+                        {/*        draggable*/}
+                        {/*    >*/}
+                        {/*        ConfigMap*/}
+                        {/*    </Button>*/}
+
+                        {/*    <Button*/}
+                        {/*        className="cursor-pointer p-2 mb-2 w-full"*/}
+                        {/*        onDragStart={(event) => onDragStart(event, 'ms')}*/}
+                        {/*        draggable*/}
+                        {/*    >*/}
+                        {/*        Secret*/}
+                        {/*    </Button>*/}
+
+
+                        {/*</ScrollArea>*/}
 
                     </Panel>
 
 
-                    <Panel position="top-right">
-                        <NodePropertiesPanel selectedNode={selectedNode} onUpdate={
-                            updateNode
-                        }/>
+                    <Panel position="top-right" className="flex-col flex gap-2 w-[400px]">
+
+                        <div>
+                            <Button onClick={
+                                () => {
+                                    console.log('nodes', nodes);
+                                    console.log('edges', edges);
+
+                                }}>
+                                <SaveIcon/>
+                                Save
+                            </Button>
+                        </div>
+                        <NodeArtifactsPanel selectedNode={selectedNode} generateArtifacts={generateArtifacts}/>
+                        <NodePropertiesPanel selectedNode={selectedNode} onUpdate={updateNode}/>
+
 
                     </Panel>
 
-                    <Panel position="top-center" className="flex gap-2">
-                        <Button onClick={
-                            () => {
-                                console.log('nodes', nodes);
-                                console.log('edges', edges);
-                            }
-                        }>
-                            <SaveIcon/>
-                            Save</Button>
-                        <Button><TargetIcon/> Get Artifacts</Button>
-                    </Panel>
+                    {/*<Panel position="top-left">*/}
+                    {/*    <SideMenuWithPanels setType={setType} onDragStart={onDragStart}/>*/}
+                    {/*</Panel>*/}
+
+
                     {/*<MiniMap/>*/}
                 </ReactFlow>
             </div>
         </div>
-    );
+
+    )
+        ;
 };
 
 export default () => (
@@ -213,6 +285,9 @@ export default () => (
     </ReactFlowProvider>
 );
 
-// TODO:- make sample artifacts generation (preview)
+// TODO:- make sample artifacts generation (preview) -- Dockerfiles, compose...
+
+// TODO:- saving to local FS with directories
+
 // TODO:- clear the code
 // TODO:- add templates

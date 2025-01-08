@@ -23,8 +23,7 @@ export type AppState = {
 };
 
 import {type AppState} from './types';
-import {useCallback} from "react";
-
+import {generateFrontendDockerfile, generateBackendDockerfile, generateDatabaseDockerfile} from '../utils/generators/dockerfile.js';
 
 const defaultFrontend = {
     port: '3000',
@@ -44,8 +43,8 @@ const defaultDb = {
     db_type: 'PostgreSQL v14',
     port: '5432',
     host: 'localhost',
-    env_var: ['POSTGRES_USER=postgres', 'POSTGRES_PASSWORD=postgres', 'POSTGRES_DB=postgres'],
-    storage_volume: '/var/lib/postgresql/data'
+    env_var: "POSTGRES_USER=postgres,POSTGRES_PASSWORD=postgres,POSTGRES_DB=postgres",
+    // storage_volume: '/var/lib/postgresql/data'
 }
 
 
@@ -69,6 +68,9 @@ const useStore = create<AppState>()(
                     return get().type;
                 },
 
+                setType: (type) => {
+                    set({type});
+                },
 
                 onNodesChange: (changes) => {
                     set({
@@ -93,7 +95,8 @@ const useStore = create<AppState>()(
                 },
 
                 onDragStart: (event, nodeType) => {
-                    // console.log('onDragStart', nodeType);
+                    console.log('onDragStart', event);
+                    console.log('onDragStart', nodeType);
                     event.dataTransfer.effectAllowed = 'move';
                     if (nodeType != null) {
                         set({type: nodeType});
@@ -134,6 +137,7 @@ const useStore = create<AppState>()(
                 onDrop: (event, position) => {
                     event.preventDefault();
                     const type = get().type;
+                    console.log('onDrop', type);
                     const id = get().getId();
                     let defaults = null
 
@@ -159,12 +163,45 @@ const useStore = create<AppState>()(
                         position,
                         data: {
                             type: type,
-                            label: `${type[0].toUpperCase()}`,
+                            label: ``,
                             ...defaults,
                         },
                     };
                     set({nodes: [...get().nodes, newNode]});
-                }
+                },
+
+
+
+                generateArtifacts: () => {
+                    const artifacts = [];
+                    const composeServices = {};
+
+                    get().nodes.forEach((node) => {
+                        if (node.type === 'frontend') {
+                            artifacts.push({
+                                id: node.id,
+                                type: node.type,
+                                content: generateFrontendDockerfile(node.data),
+                            });
+                        } else if (node.type === 'backend') {
+                            artifacts.push({
+                                id: node.id,
+                                type: node.type,
+                                content: generateBackendDockerfile(node.data),
+                            });
+                        }
+                        else if (node.type === 'db') {
+                            artifacts.push({
+                                id: node.id,
+                                type: node.type,
+                                content: generateDatabaseDockerfile(node.data),
+                            })
+                        }
+                    });
+
+                    // artifacts['docker-compose.yml'] = generateComposeFile(composeServices);
+                    return artifacts;
+                },
             }
         ),
         {

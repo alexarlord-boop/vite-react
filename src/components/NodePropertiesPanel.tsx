@@ -1,4 +1,5 @@
 import React, {useEffect, useRef} from 'react';
+import {PencilIcon, PenIcon} from "lucide-react";
 
 const PropertiesPanel: React.FC<any> = ({ selectedNode, onUpdate }) => {
     if (!selectedNode) {
@@ -137,7 +138,7 @@ const PropertiesPanel: React.FC<any> = ({ selectedNode, onUpdate }) => {
                             <label className="block text-sm font-medium">Type</label>
                             <select
                                 value={selectedNode.data.db_type}
-                                onChange={(e) => handleChange('type', e.target.value)}
+                                onChange={(e) => handleChange('db_type', e.target.value)}
                                 className="w-full border rounded px-2 py-1"
                             >
                                 <option value="PostgreSQL v14">PostgreSQL v14</option>
@@ -172,15 +173,15 @@ const PropertiesPanel: React.FC<any> = ({ selectedNode, onUpdate }) => {
                                 className="w-full border rounded px-2 py-1"
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium">Storage Volume</label>
-                            <input
-                                type="text"
-                                value={selectedNode.data.storage_volume}
-                                onChange={(e) => handleChange('storage_volume', e.target.value)}
-                                className="w-full border rounded px-2 py-1"
-                            />
-                        </div>
+                        {/*<div>*/}
+                        {/*    <label className="block text-sm font-medium">Storage Volume</label>*/}
+                        {/*    <input*/}
+                        {/*        type="text"*/}
+                        {/*        value={selectedNode.data.storage_volume}*/}
+                        {/*        onChange={(e) => handleChange('storage_volume', e.target.value)}*/}
+                        {/*        className="w-full border rounded px-2 py-1"*/}
+                        {/*    />*/}
+                        {/*</div>*/}
                     </div>
                 );
 
@@ -189,8 +190,8 @@ const PropertiesPanel: React.FC<any> = ({ selectedNode, onUpdate }) => {
 
 
     return (
-        <div className=" w-[250px] rounded-md border p-4 bg-white">
-            <p><strong>Edit Node</strong></p>
+        <div className=" rounded-md border p-4 bg-white">
+            <p className="flex"> <span className="pe-2"><PencilIcon size="16"/></span> <strong> Edit Node</strong></p>
             {handleNodeTypePanel(selectedNode.data.type)}
         </div>
     );
